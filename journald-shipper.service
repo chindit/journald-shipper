@@ -1,0 +1,11 @@
+[Unit]
+Description=Journald shipper
+After=systemd-journald.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+ExecStart=/usr/bin/journald-shipper.py
+
+[Install]
+WantedBy=multi-user.target
