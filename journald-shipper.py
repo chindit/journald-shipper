@@ -13,6 +13,7 @@ from systemd import journal
 import datetime
 import select
 import pytz
+import re
 from elasticsearch import Elasticsearch
 
 waitTime = 200  # In MS, to not add overload
@@ -69,7 +70,27 @@ def prepareespayload(data):
     payload['@timestamp'] = payload['@timestamp'].astimezone(pytz.timezone(localTimezone))
     # Correct payload is UTC
     payload['@timestamp'] = payload['@timestamp'].astimezone(pytz.utc)
-    return payload
+
+    return split_payload(payload)
+
+
+def split_payload(data):
+    """
+    Split payload into sub-arguments
+    :param data: dict
+    :return: dict
+    """
+    if (data['message'] is None):
+        return data
+
+    sudo = r"\((?P<user>\S+)\)\sCMD\s\((?P<command>.*)\)"
+    sudo_matches = re.finditer(sudo, data['message'])
+    for match in sudo_matches:
+        data['user'] = match.group('user')
+        data['command'] = match.group('command')
+        data['type'] = 'sudo'
+
+    return data
 
 
 def insertintoes(data):
