@@ -116,7 +116,7 @@ class JournaldShipper:
                         timestamp = datetime.datetime.now()
                     payload['@timestamp'] = timestamp
                 continue
-            payload[self.keycleaner(key)] = data.get(key)
+            payload[self.key_cleaner(key)] = data.get(key)
         if payload.get('@timestamp') is None:
             payload['@timestamp'] = datetime.datetime.now()
 
