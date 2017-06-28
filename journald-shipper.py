@@ -188,7 +188,7 @@ p.register(journal_fd, poll_event_mask)
 
 # Poll for new journal entries at regular interval
 while True:
-    if p.poll(waitTime):
+    if p.poll(waitTime) is not None:
         if j.process() == journal.APPEND:
             for entry in j:
                 insertintoes(prepareespayload(entry))
