@@ -69,7 +69,7 @@ class JournaldShipper:
             if p.poll(self.waitTime) is not None:
                 if j.process() == journal.APPEND:
                     for entry in j:
-                        insert_int_oes(prepare_es_payload(entry))
+                        insert_into_es(prepare_es_payload(entry))
 
         print('Daemon stopped');
 
