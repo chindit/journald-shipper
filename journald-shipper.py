@@ -27,16 +27,15 @@ class JournaldShipper:
     def __init__(self):
         """Initialize Daemon."""
         self.stdin_path = '/dev/null'
-        self.stdout_path = '/dev/null'
-        self.stderr_path = '/dev/null'
+        self.stdout_path = '/tmp/stdout'
+        self.stderr_path = '/tmp/stderr'
         self.pidfile_path = '/var/run/journald-shipper.pid'
         self.pidfile_timeout = 1
 
 
-
     def run(self):
-        #print('--------------')
-        #print('Daemon Started')
+        print('--------------')
+        print('Daemon Started')
 
         """
         Main loop.
@@ -73,7 +72,7 @@ class JournaldShipper:
                     for entry in j:
                         insert_int_oes(prepare_es_payload(entry))
 
-        #print('Daemon stopped');
+        print('Daemon stopped');
 
 
     def key_cleaner(key):
