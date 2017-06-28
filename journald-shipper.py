@@ -15,14 +15,23 @@ import select
 import pytz
 import re
 from elasticsearch import Elasticsearch
-
-from daemon import Daemon
+from daemon import runner
 
 
 class JournaldShipper:
 
     waitTime = 200  # In MS, to not add overload
     localTimezone = 'CET'
+
+
+    def __init__(self):
+        """Initialize Daemon."""
+        self.stdin_path = '/dev/null'
+        self.stdout_path = '/dev/null'
+        self.stderr_path = '/dev/null'
+        self.pidfile_path = '/var/run/journald-shipper.pid'
+        self.pidfile_timeout = 1
+
 
 
     def run(self):
@@ -204,21 +213,7 @@ class JournaldShipper:
 
         es.index(index=logstashIndex, doc_type='systemd', timestamp=timestamp, body=data)
 
-if __name__ == "__main__":
-    daemonx = JournaldShipper('/var/run/journald-shipper.pid')
-    if len(sys.argv) == 2:
-        if 'start' == sys.argv[1]:
-            daemonx.start()
-        elif 'stop' == sys.argv[1]:
-            print('Daemon Stopped')
-            daemonx.stop()
-        elif 'restart' == sys.argv[1]:
-            print('Daemon restarting')
-            daemonx.restart()
-        else:
-            print("Unknown command")
-            sys.exit(2)
-        sys.exit(0)
-    else:
-        print("usage: %s start|stop|restart" % sys.argv[0])
-        sys.exit(2)
+if __name__ == '__main__':  
+    app = JournaldShipper()
+    daemon_runner = runner.DaemonRunner(app)
+    daemon_runner.do_action()
