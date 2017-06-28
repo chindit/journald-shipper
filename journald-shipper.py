@@ -69,7 +69,7 @@ class JournaldShipper:
             if p.poll(self.waitTime) is not None:
                 if j.process() == journal.APPEND:
                     for entry in j:
-                        insert_into_es(prepare_es_payload(entry))
+                        self.insert_into_es(self.prepare_es_payload(entry))
 
         print('Daemon stopped');
 
@@ -108,7 +108,7 @@ class JournaldShipper:
         """
         payload = dict()
         for key in data:
-            if not check_key_allowance(key):
+            if not self.check_key_allowance(key):
                 # Special check for timestamp
                 if key == '__REALTIME_TIMESTAMP':
                     timestamp = data.get(key)
@@ -125,7 +125,7 @@ class JournaldShipper:
         # Correct payload is UTC
         payload['@timestamp'] = payload['@timestamp'].astimezone(pytz.utc)
 
-        return split_payload(payload)
+        return self.split_payload(payload)
 
 
     def split_payload(data):
