@@ -16,6 +16,8 @@ import pytz
 import re
 from elasticsearch import Elasticsearch
 
+from daemon import Daemon
+
 
 class JournaldShipper:
 
@@ -23,7 +25,10 @@ class JournaldShipper:
     localTimezone = 'CET'
 
 
-    def __init__():
+    def run(self):
+        print('--------------')
+        print('Daemon Started')
+
         """
         Main loop.
         Used to seek events from Journald
@@ -58,6 +63,8 @@ class JournaldShipper:
                 if j.process() == journal.APPEND:
                     for entry in j:
                         insert_int_oes(prepare_es_payload(entry))
+
+        print('Daemon stopped');
 
 
     def key_cleaner(key):
@@ -196,3 +203,22 @@ class JournaldShipper:
             es.indices.create(logstashIndex, ignore=400, body=mapping)
 
         es.index(index=logstashIndex, doc_type='systemd', timestamp=timestamp, body=data)
+
+if __name__ == "__main__":
+    daemonx = JournaldShipper('/var/run/journald-shipper.pid')
+    if len(sys.argv) == 2:
+        if 'start' == sys.argv[1]:
+            daemonx.start()
+        elif 'stop' == sys.argv[1]:
+            print('Daemon Stopped')
+            daemonx.stop()
+        elif 'restart' == sys.argv[1]:
+            print('Daemon restarting')
+            daemonx.restart()
+        else:
+            print("Unknown command")
+            sys.exit(2)
+            sys.exit(0)
+        else:
+            print("usage: %s start|stop|restart" % sys.argv[0])
+            sys.exit(2)
