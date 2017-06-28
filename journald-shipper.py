@@ -20,9 +20,6 @@ from daemon import runner
 
 class JournaldShipper:
 
-    waitTime = 200  # In MS, to not add overload
-    localTimezone = 'CET'
-
 
     def __init__(self):
         """Initialize Daemon."""
@@ -31,6 +28,8 @@ class JournaldShipper:
         self.stderr_path = '/tmp/stderr'
         self.pidfile_path = '/var/run/journald-shipper.pid'
         self.pidfile_timeout = 1
+        self.waitTime = 250
+        self.localTimezone = 'CET'
 
 
     def run(self):
@@ -67,7 +66,7 @@ class JournaldShipper:
 
         # Poll for new journal entries at regular interval
         while True:
-            if p.poll(waitTime) is not None:
+            if p.poll(self.waitTime) is not None:
                 if j.process() == journal.APPEND:
                     for entry in j:
                         insert_int_oes(prepare_es_payload(entry))
@@ -122,7 +121,7 @@ class JournaldShipper:
             payload['@timestamp'] = datetime.datetime.now()
 
         # Current timezone is local
-        payload['@timestamp'] = payload['@timestamp'].astimezone(pytz.timezone(localTimezone))
+        payload['@timestamp'] = payload['@timestamp'].astimezone(pytz.timezone(self.localTimezone))
         # Correct payload is UTC
         payload['@timestamp'] = payload['@timestamp'].astimezone(pytz.utc)
 
