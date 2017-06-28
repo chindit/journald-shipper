@@ -74,7 +74,7 @@ class JournaldShipper:
         print('Daemon stopped');
 
 
-    def key_cleaner(key):
+    def key_cleaner(self, key):
         """
         Clean key to fit ES standards
         :param key: str
@@ -86,7 +86,7 @@ class JournaldShipper:
         return optimizedkey.lower()
 
 
-    def check_key_allowance(key):
+    def check_key_allowance(self, key):
         """
         Check if key is allowed for data
         :param key: dict
@@ -100,7 +100,7 @@ class JournaldShipper:
         return True
 
 
-    def prepare_es_payload(data):
+    def prepare_es_payload(self, data):
         """
         Prepare payload for ES
         :param data: dict
@@ -128,7 +128,7 @@ class JournaldShipper:
         return self.split_payload(payload)
 
 
-    def split_payload(data):
+    def split_payload(self, data):
         """
         Split payload into sub-arguments
         :param data: dict
@@ -147,7 +147,7 @@ class JournaldShipper:
         return data
 
 
-    def insert_into_es(data):
+    def insert_into_es(self, data):
         """
         Insert data into ElasicSearch
         :param data: dict
