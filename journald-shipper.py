@@ -35,8 +35,8 @@ class JournaldShipper:
 
 
     def run(self):
-        print('--------------')
-        print('Daemon Started')
+        #print('--------------')
+        #print('Daemon Started')
 
         """
         Main loop.
@@ -73,7 +73,7 @@ class JournaldShipper:
                     for entry in j:
                         insert_int_oes(prepare_es_payload(entry))
 
-        print('Daemon stopped');
+        #print('Daemon stopped');
 
 
     def key_cleaner(key):
