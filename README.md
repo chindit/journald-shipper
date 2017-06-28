@@ -8,6 +8,7 @@ Following packages are required:
 * `python-pytz` For timezone conversion
 * `python-systemd` To access journald
 * `python-elasticsearch` To output to ElasticSearch
+* `python-daemon` To launch script as a daemon
 
 ## Install
 
