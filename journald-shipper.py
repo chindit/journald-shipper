@@ -108,6 +108,8 @@ class JournaldShipper:
         """
         payload = dict()
         for key in data:
+            if isinstance(data.get(key), (bytes, bytearray)):
+                data[key] = data.get(key).decode()
             if not self.check_key_allowance(key):
                 # Special check for timestamp
                 if key == '__REALTIME_TIMESTAMP':
