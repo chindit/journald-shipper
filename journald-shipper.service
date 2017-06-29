@@ -5,7 +5,8 @@ After=systemd-journald.service
 [Service]
 Type=simple
 RemainAfterExit=no
-ExecStart=/usr/bin/python /usr/bin/journald-shipper.py
+ExecStart=/usr/bin/python /usr/bin/journald-shipper.py start
+ExecStop=/usr/bin/python /usr/bin/journald-shipper.py stop
 
 [Install]
 WantedBy=multi-user.target
