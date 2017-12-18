@@ -19,8 +19,6 @@ from daemon import runner
 
 
 class JournaldShipper:
-
-
     def __init__(self):
         """Initialize Daemon."""
         self.stdin_path = '/dev/null'
@@ -30,7 +28,6 @@ class JournaldShipper:
         self.pidfile_timeout = 1
         self.waitTime = 250
         self.localTimezone = 'CET'
-
 
     def run(self):
         print('--------------')
@@ -71,9 +68,6 @@ class JournaldShipper:
                     for entry in j:
                         self.insert_into_es(self.prepare_es_payload(entry))
 
-        print('Daemon stopped');
-
-
     def key_cleaner(self, key):
         """
         Clean key to fit ES standards
@@ -85,20 +79,19 @@ class JournaldShipper:
             optimizedkey = key[1:]
         return optimizedkey.lower()
 
-
     def check_key_allowance(self, key):
         """
         Check if key is allowed for data
         :param key: dict
         :return: bool
         """
-        skippedkeys = {'_TRANSPORT', '_SOURCE_MONOTONIC_TIMESTAMP', '_SOURCE_REALTIME_TIMESTAMP', '_BOOT_ID', '_MACHINE_ID'}
+        skippedkeys = {'_TRANSPORT', '_SOURCE_MONOTONIC_TIMESTAMP', '_SOURCE_REALTIME_TIMESTAMP', '_BOOT_ID',
+                       '_MACHINE_ID'}
         if key in skippedkeys:
             return False
         if key[0:2] == '__':
             return False
         return True
-
 
     def prepare_es_payload(self, data):
         """
@@ -126,9 +119,9 @@ class JournaldShipper:
         payload['@timestamp'] = payload['@timestamp'].astimezone(pytz.timezone(self.localTimezone))
         # Correct payload is UTC
         payload['@timestamp'] = payload['@timestamp'].astimezone(pytz.utc)
+        payload['type'] = 'systemd'
 
         return self.split_payload(payload)
-
 
     def split_payload(self, data):
         """
@@ -148,72 +141,21 @@ class JournaldShipper:
 
         return data
 
-
     def insert_into_es(self, data):
         """
         Insert data into ElasicSearch
         :param data: dict
         :return:
         """
-        timestamp = data.get('@timestamp')
+        timestamp = datetime.datetime.now()
         logstashIndex = 'logstash-' + timestamp.strftime("%Y.%m.%d")
         es = Elasticsearch()
         if not es.indices.exists(logstashIndex):
-            # Setting mappings for index
-            mapping = '''
-                {
-                    "mappings": {
-                          "_default_": {
-                            "_all": {
-                              "enabled": true,
-                              "norms": false
-                            },
-                            "dynamic_templates": [
-                              {
-                                "message_field": {
-                                  "path_match": "message",
-                                  "match_mapping_type": "string",
-                                  "mapping": {
-                                    "norms": false,
-                                    "type": "text"
-                                  }
-                                }
-                              },
-                              {
-                                "string_fields": {
-                                  "match": "*",
-                                  "match_mapping_type": "string",
-                                  "mapping": {
-                                    "fields": {
-                                      "keyword": {
-                                        "type": "keyword"
-                                      }
-                                    },
-                                    "norms": false,
-                                    "type": "text"
-                                  }
-                                }
-                              }
-                            ],
-                            "properties": {
-                              "@timestamp": {
-                                "type": "date",
-                                "include_in_all": true
-                              },
-                              "@version": {
-                                "type": "keyword",
-                                "include_in_all": true
-                              }
-                            }
-                          }
-                    }
-                }
-            '''
-            es.indices.create(logstashIndex, ignore=400, body=mapping)
+            es.indices.create(logstashIndex, ignore=400)
+        es.index(index=logstashIndex, doc_type='doc', body=data)
 
-        es.index(index=logstashIndex, doc_type='systemd', timestamp=timestamp, body=data)
 
-if __name__ == '__main__':  
+if __name__ == '__main__':
     app = JournaldShipper()
     daemon_runner = runner.DaemonRunner(app)
     daemon_runner.do_action()
